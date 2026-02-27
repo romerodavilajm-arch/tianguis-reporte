@@ -1,96 +1,122 @@
-[
-  {
-    "id": "tianguis-juarez",
-    "nombre": "Corredor Juárez",
-    "descripcion": "Corredor comercial informal ubicado sobre la Av. Juárez, activo todos los domingos desde las 6am.",
+{
+  "corredor": {
+    "id": "corredor-penaflor",
+    "nombre": "Corredor Comercial de Peñaflor",
+    "descripcion": "Corredor comercial que opera sobre un baldío en Blvd. Peñaflor esquina Valle de Tehuacán. Sujeto a seguimiento por denuncia ciudadana folio VP/609/2025.",
     "color": "#e63946",
-    "colorNombre": "Rojo",
-    "diasOperacion": "Domingos",
-    "horario": "6:00 AM – 3:00 PM",
-    "numeroLocales": 148,
-    "antiguedad": "Más de 20 años",
-    "responsable": "Asociación de Comerciantes del Centro",
-    "telefono": "442-123-4567",
-    "categoria": "Mixto (ropa, comida, electrónica)",
+    "ubicacion": "Boulevard Peñaflor, esquina Valle de Tehuacán, Colonia Ciudad del Sol",
+    "delegacion": "Felipe Carrillo Puerto",
+    "organizacion": "FECOPSE",
+    "coordinador": "Emilio Pérez Amaro",
+    "foliosDenuncia": ["VP/609/2025"],
+    "ultimoSeguimiento": "15 de febrero de 2026",
+    "observaciones": [
+      "Se atiende denuncia a las 17:30 hrs.",
+      "No hay invasión en banquetas aledañas.",
+      "Cada puesto tiene bote de basura.",
+      "Hay residuos de basura y escombro juntados para su pronta recolección.",
+      "Se colocaron conos y señalamiento para evitar estacionamiento junto a la ciclovía."
+    ],
     "problemas": [
       {
         "id": 1,
-        "titulo": "Obstrucción vial",
-        "descripcion": "Los puestos invaden dos carriles de la avenida principal, generando congestionamiento vehicular severo.",
+        "titulo": "Estacionamiento sobre ciclovía",
+        "descripcion": "Los vehículos de compradores y locatarios se estacionan en paralelo a la ciclovía, obstruyéndola y generando riesgo para los ciclistas.",
         "severidad": "alta"
       },
       {
         "id": 2,
-        "titulo": "Manejo inadecuado de residuos",
-        "descripcion": "No existe un programa de recolección diferenciada. Se acumulan residuos orgánicos al cierre del tianguis.",
+        "titulo": "Generación de basura y escombro",
+        "descripcion": "El tianguis opera sobre un baldío y deja residuos de basura y escombro tras su operación. Motivo principal de múltiples denuncias ciudadanas.",
         "severidad": "alta"
       },
       {
         "id": 3,
-        "titulo": "Falta de sanitarios portátiles",
-        "descripcion": "Solo existe 1 módulo sanitario para más de 140 locatarios y cientos de visitantes.",
-        "severidad": "media"
-      },
-      {
-        "id": 4,
-        "titulo": "Instalaciones eléctricas irregulares",
-        "descripcion": "Varios locatarios realizan conexiones directas a postes del alumbrado público sin supervisión.",
+        "titulo": "No viable en ubicación actual",
+        "descripcion": "Por las condiciones del terreno y las denuncias recurrentes, la autoridad no considera viable mantener el corredor en su ubicación actual.",
         "severidad": "alta"
-      },
-      {
-        "id": 5,
-        "titulo": "Ausencia de señalética",
-        "descripcion": "No hay señalización que delimite el área del corredor ni informe a los peatones.",
-        "severidad": "baja"
       }
     ],
     "coordenadas": [
-      [20.5888, -100.3901],
-      [20.5892, -100.3885],
-      [20.5879, -100.3882],
-      [20.5875, -100.3898],
-      [20.5888, -100.3901]
+      [20.642581835192246, -100.49026574384561],
+      [20.642218933372078, -100.49010606193153],
+      [20.642795306446075, -100.48872595395655],
+      [20.64308882893104,  -100.48891415049862],
+      [20.642581835192246, -100.49026574384561]
     ]
   },
-  {
-    "id": "tianguis-alameda",
-    "nombre": "Corredor Alameda",
-    "descripcion": "Tianguis ubicado en los alrededores del parque Alameda, especializado en productos agrícolas y artesanías locales.",
-    "color": "#2a9d8f",
-    "colorNombre": "Verde",
-    "diasOperacion": "Sábados y domingos",
-    "horario": "7:00 AM – 4:00 PM",
-    "numeroLocales": 87,
-    "antiguedad": "12 años",
-    "responsable": "Unión de Locatarios Alameda",
-    "telefono": "442-987-6543",
-    "categoria": "Agrícola y artesanías",
-    "problemas": [
-      {
-        "id": 1,
-        "titulo": "Invasión de áreas verdes",
-        "descripcion": "Parte de los puestos se instalan sobre áreas verdes del parque dañando el pasto y jardinería.",
-        "severidad": "media"
-      },
-      {
-        "id": 2,
-        "titulo": "Conflicto con vecinos",
-        "descripcion": "Habitantes de la zona reportan ruido excesivo desde las 5am por instalación de puestos.",
-        "severidad": "media"
-      },
-      {
-        "id": 3,
-        "titulo": "Estacionamiento insuficiente",
-        "descripcion": "Los visitantes estacionan en doble fila en calles adyacentes debido a la falta de espacios habilitados.",
-        "severidad": "baja"
-      }
-    ],
-    "coordenadas": [
-      [20.5920, -100.3950],
-      [20.5928, -100.3935],
-      [20.5915, -100.3930],
-      [20.5908, -100.3945],
-      [20.5920, -100.3950]
-    ]
-  }
-]
+  "prediosReubicacion": [
+    {
+      "id": "predio-1",
+      "numero": 1,
+      "nombre": "Propuesta 1 – Blvd. Peñaflor / Paseo Querétaro",
+      "direccion": "Boulevard Peñaflor, entre Paseo Querétaro y Av. Cantera",
+      "googleMaps": "https://maps.app.goo.gl/Bd3eg6ZET8YwNC4b8",
+      "coordenadas": [
+        [20.640015471186857, -100.49672217897341],
+        [20.639278656792953, -100.49864626497880],
+        [20.639053006670196, -100.49852324157722],
+        [20.639757586554538, -100.49658439276308],
+        [20.640015471186857, -100.49672217897341]
+      ]
+    },
+    {
+      "id": "predio-2",
+      "numero": 2,
+      "nombre": "Propuesta 2 – Av. Cantera / Circuito Ciudad del Sol",
+      "direccion": "Av. Cantera entre Circuito Ciudad del Sol y Blvd. Peñaflor",
+      "googleMaps": null,
+      "coordenadas": [
+        [20.639135309799443, -100.490250831072],
+        [20.639071533296473, -100.49040227652696],
+        [20.638549509799887, -100.49014986743555],
+        [20.638577855013168, -100.49000599425334],
+        [20.639135309799443, -100.490250831072]
+      ]
+    },
+    {
+      "id": "predio-3",
+      "numero": 3,
+      "nombre": "Propuesta 3 – Valle de Tehuacán / Blvd. Peñaflor",
+      "direccion": "Valle de Tehuacán esquina Boulevard Peñaflor",
+      "googleMaps": "https://maps.app.goo.gl/cUEc1dVJb1659pyg8",
+      "coordenadas": [
+        [20.64354897823472,  -100.48753558722687],
+        [20.643375857590243, -100.48799935181782],
+        [20.643117362016,    -100.48789798250851],
+        [20.643292854472847, -100.48741901252112],
+        [20.64354897823472,  -100.48753558722687]
+      ]
+    },
+    {
+      "id": "predio-4",
+      "numero": 4,
+      "nombre": "Propuesta 4 – Circuito Puertas del Sol / Blvd. Peñaflor",
+      "direccion": "Circuito Puertas del Sol esquina Boulevard Peñaflor",
+      "googleMaps": "https://maps.app.goo.gl/3SY6Apehw3gpGccJ9",
+      "coordenadas": [
+        [20.64357828869528,  -100.48276827923263],
+        [20.643097310079114, -100.48255751060525],
+        [20.643301466655572, -100.48199546093237],
+        [20.64380320623087,  -100.48219883416944],
+        [20.64357828869528,  -100.48276827923263]
+      ]
+    },
+    {
+      "id": "predio-5",
+      "numero": 5,
+      "nombre": "Propuesta 5 – Blvd. Peñaflor / Punta Norte",
+      "direccion": "Boulevard Peñaflor entre Punta Norte y Valle de Tehuacán",
+      "googleMaps": "https://maps.app.goo.gl/1PVv4wAvdi61wd4s8",
+      "coordenadas": [
+        [20.644431138327406, -100.48509514141674],
+        [20.644341171724122, -100.48538356164367],
+        [20.644071271595692, -100.48527263078716],
+        [20.643787529918797, -100.48590863436424],
+        [20.643268488895586, -100.48566458647990],
+        [20.64362143698409,  -100.48478453501848],
+        [20.644431138327406, -100.48509514141674]
+      ]
+    }
+  ]
+}

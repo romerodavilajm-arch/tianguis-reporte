@@ -1,0 +1,212 @@
+Propuesta de reubicacion 1. 
+Dirección  Boulevard Peñaflor, entre Paseo Querétaro y Av. Cantera
+https://maps.app.goo.gl/Bd3eg6ZET8YwNC4b8
+
+Poligono
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              -100.49672217897341,
+              20.640015471186857
+            ],
+            [
+              -100.4986462649788,
+              20.639278656792953
+            ],
+            [
+              -100.49852324157722,
+              20.639053006670196
+            ],
+            [
+              -100.49658439276308,
+              20.639757586554538
+            ],
+            [
+              -100.49672217897341,
+              20.640015471186857
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    }
+  ]
+}
+
+Propuesta de reubicacion 2.
+Dirección Av. Cantera entre Circuito Ciudad del Sol y Blvd. PeñaFlor
+Poligono
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              -100.490250831072,
+              20.639135309799443
+            ],
+            [
+              -100.49040227652696,
+              20.639071533296473
+            ],
+            [
+              -100.49014986743555,
+              20.638549509799887
+            ],
+            [
+              -100.49000599425334,
+              20.638577855013168
+            ],
+            [
+              -100.490250831072,
+              20.639135309799443
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    }
+  ]
+}
+
+
+Propuesta de reubicacion 3.
+Dirección Valle de Tehuacan esquina Boulevard Peñaflor.Adjuntamos ubicación  https://maps.app.goo.gl/cUEc1dVJb1659pyg8
+Poligono
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              -100.48753558722687,
+              20.64354897823472
+            ],
+            [
+              -100.48799935181782,
+              20.643375857590243
+            ],
+            [
+              -100.48789798250851,
+              20.643117362016
+            ],
+            [
+              -100.48741901252112,
+              20.643292854472847
+            ],
+            [
+              -100.48753558722687,
+              20.64354897823472
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    }
+  ]
+}
+
+Propuesta de reubicacion 4.
+Dirección Circuito Puertas del Sol esquina Boulevard Peñaflor.
+Adjuntamos ubicación:
+https://maps.app.goo.gl/3SY6Apehw3gpGccJ9
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              -100.48276827923263,
+              20.64357828869528
+            ],
+            [
+              -100.48255751060525,
+              20.643097310079114
+            ],
+            [
+              -100.48199546093237,
+              20.643301466655572
+            ],
+            [
+              -100.48219883416944,
+              20.64380320623087
+            ],
+            [
+              -100.48276827923263,
+              20.64357828869528
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    }
+  ]
+}
+
+
+Propuesta de reubicacion 5.
+Dirección Boulevard Peñaflor entre Punta Norte y Valle de Tehuacan
+https://maps.app.goo.gl/1PVv4wAvdi61wd4s8
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              -100.48509514141674,
+              20.644431138327406
+            ],
+            [
+              -100.48538356164367,
+              20.644341171724122
+            ],
+            [
+              -100.48527263078716,
+              20.644071271595692
+            ],
+            [
+              -100.48590863436424,
+              20.643787529918797
+            ],
+            [
+              -100.4856645864799,
+              20.643268488895586
+            ],
+            [
+              -100.48478453501848,
+              20.64362143698409
+            ],
+            [
+              -100.48509514141674,
+              20.644431138327406
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    }
+  ]
+}

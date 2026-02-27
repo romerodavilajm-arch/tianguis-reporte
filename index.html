@@ -3,17 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reporte de Tianguis – Querétaro</title>
+  <title>Corredor Comercial de Peñaflor – Reporte</title>
 
-  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- Turf.js para cálculo de área y distancia -->
   <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
 
   <style>
@@ -25,10 +19,11 @@
       --surface2: #1e2333;
       --border: #2a2f44;
       --text: #e8eaf0;
-      --text-muted: #7a82a0;
+      --muted: #7a82a0;
       --accent: #f0c040;
       --red: #e63946;
       --green: #2a9d8f;
+      --blue: #7b9ff5;
       --alta: #ff4757;
       --media: #ffa502;
       --baja: #2ed573;
@@ -39,249 +34,149 @@
     /* HEADER */
     header {
       position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-      height: 56px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 16px;
-      padding: 0 24px;
+      height: 56px; background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 16px; padding: 0 24px;
     }
-    header .logo {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800; font-size: 1rem;
-      letter-spacing: 0.08em;
-      color: var(--accent);
-      text-transform: uppercase;
-    }
-    header .subtitle {
-      font-size: 0.78rem; color: var(--text-muted); font-weight: 300;
-      border-left: 1px solid var(--border); padding-left: 16px;
-    }
-    header .badge {
-      margin-left: auto;
-      font-size: 0.7rem; font-weight: 600;
-      background: var(--surface2); border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 4px 10px; border-radius: 20px;
-      letter-spacing: 0.05em; text-transform: uppercase;
-    }
+    .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem; letter-spacing: 0.08em; color: var(--accent); text-transform: uppercase; }
+    .subtitle { font-size: 0.78rem; color: var(--muted); font-weight: 300; border-left: 1px solid var(--border); padding-left: 16px; }
+    .header-badge { margin-left: auto; font-size: 0.7rem; font-weight: 600; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 4px 10px; border-radius: 20px; letter-spacing: 0.05em; text-transform: uppercase; }
 
     /* LAYOUT */
-    .layout {
-      display: flex;
-      height: 100vh;
-      padding-top: 56px;
-    }
+    .layout { display: flex; height: 100vh; padding-top: 56px; }
 
     /* SIDEBAR */
-    .sidebar {
-      width: 380px;
-      min-width: 380px;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex; flex-direction: column;
-      overflow: hidden;
-      transition: transform 0.3s ease;
-      z-index: 10;
-    }
+    .sidebar { width: 390px; min-width: 390px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; z-index: 10; }
+    .sidebar-header { padding: 18px 24px 14px; border-bottom: 1px solid var(--border); }
+    .sidebar-header h2 { font-family: 'Syne', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .sidebar-header p { font-size: 0.8rem; color: var(--muted); font-weight: 300; }
 
-    .sidebar-header {
-      padding: 20px 24px 16px;
-      border-bottom: 1px solid var(--border);
-    }
-    .sidebar-header h2 {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.7rem; font-weight: 700;
-      letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--text-muted); margin-bottom: 4px;
-    }
-    .sidebar-header p {
-      font-size: 0.82rem; color: var(--text-muted); font-weight: 300;
-    }
-
-    /* DEFAULT STATE */
-    .default-state {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 32px; gap: 12px; text-align: center;
-    }
-    .default-state .icon { font-size: 2.5rem; opacity: 0.3; }
-    .default-state p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+    /* DEFAULT */
+    .default-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; gap: 12px; text-align: center; }
+    .default-state .icon { font-size: 2.5rem; opacity: 0.25; }
+    .default-state p { font-size: 0.83rem; color: var(--muted); line-height: 1.7; }
 
     /* PANEL */
-    .panel { flex: 1; overflow-y: auto; display: none; }
-    .panel.active { display: block; }
+    .panel { flex: 1; overflow-y: auto; display: none; flex-direction: column; }
+    .panel.active { display: flex; }
+    .panel::-webkit-scrollbar { width: 4px; }
+    .panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-    .panel-top {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border);
-    }
-    .panel-tag {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
-      padding: 3px 10px; border-radius: 20px; margin-bottom: 10px;
-      background: color-mix(in srgb, var(--color) 15%, transparent);
-      color: var(--color);
-      border: 1px solid color-mix(in srgb, var(--color) 30%, transparent);
-    }
-    .panel-tag::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--color); }
+    /* TAG */
+    .tag { display: inline-flex; align-items: center; gap: 6px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
+    .tag::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 
-    .panel-top h1 {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.3rem; font-weight: 800;
-      color: var(--text); margin-bottom: 8px;
-    }
-    .panel-top .desc {
-      font-size: 0.83rem; color: var(--text-muted); line-height: 1.6; font-weight: 300;
-    }
+    /* PANEL TOP */
+    .panel-top { padding: 20px 24px; border-bottom: 1px solid var(--border); }
+    .panel-top h1 { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 800; color: var(--text); margin-bottom: 8px; line-height: 1.3; }
+    .panel-top .desc { font-size: 0.82rem; color: var(--muted); line-height: 1.65; font-weight: 300; }
+
+    /* FOLIO */
+    .folio-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .folio-badge { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; background: color-mix(in srgb, var(--alta) 10%, transparent); border: 1px solid color-mix(in srgb, var(--alta) 30%, transparent); color: var(--alta); padding: 3px 10px; border-radius: 20px; }
 
     /* STATS GRID */
-    .stats-grid {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 1px; background: var(--border);
-      margin: 0; border-top: 1px solid var(--border);
-    }
-    .stat-cell {
-      background: var(--surface);
-      padding: 14px 18px;
-    }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-top: 1px solid var(--border); }
+    .stat-cell { background: var(--surface); padding: 13px 18px; }
     .stat-cell:hover { background: var(--surface2); }
-    .stat-label {
-      font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;
-    }
-    .stat-value {
-      font-family: 'Syne', sans-serif;
-      font-size: 1rem; font-weight: 700; color: var(--text);
-    }
-    .stat-value.highlight { color: var(--accent); }
-    .stat-value.distance { color: #7b9ff5; }
+    .stat-cell.full { grid-column: 1 / -1; }
+    .stat-label { font-size: 0.63rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .stat-value { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--text); }
+    .stat-value.sm { font-family: 'DM Sans'; font-size: 0.82rem; font-weight: 500; }
+    .stat-value.accent { color: var(--accent); }
+    .stat-value.blue { color: var(--blue); }
+    .stat-value.green { color: var(--green); }
 
     /* SECTION */
-    .section { padding: 20px 24px; border-bottom: 1px solid var(--border); }
-    .section-title {
-      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px;
-    }
+    .section { padding: 18px 24px; border-bottom: 1px solid var(--border); }
+    .section-title { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
 
-    /* CONTACT */
-    .contact-row {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 0.83rem; color: var(--text-muted); margin-bottom: 8px;
-    }
-    .contact-row span:first-child { font-size: 1rem; }
-    .contact-row strong { color: var(--text); font-weight: 500; }
+    /* OBSERVACIONES */
+    .obs-item { display: flex; gap: 10px; font-size: 0.79rem; color: var(--muted); margin-bottom: 7px; line-height: 1.55; }
+    .obs-item::before { content: '–'; color: var(--accent); flex-shrink: 0; }
 
-    /* PROBLEMS */
-    .problem-item {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px;
-      margin-bottom: 10px;
-      border-left: 3px solid var(--sev-color);
-      transition: background 0.2s;
-    }
-    .problem-item:hover { background: color-mix(in srgb, var(--surface2) 80%, white 3%); }
-    .problem-header {
-      display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
-    }
-    .sev-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--sev-color); flex-shrink: 0;
-    }
-    .problem-title { font-size: 0.85rem; font-weight: 600; color: var(--text); }
-    .problem-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.55; font-weight: 300; }
-    .sev-badge {
-      margin-left: auto; font-size: 0.62rem; font-weight: 700;
-      letter-spacing: 0.08em; text-transform: uppercase;
-      padding: 2px 8px; border-radius: 20px;
-      background: color-mix(in srgb, var(--sev-color) 15%, transparent);
-      color: var(--sev-color);
-      border: 1px solid color-mix(in srgb, var(--sev-color) 30%, transparent);
-    }
+    /* PROBLEMAS */
+    .problem-item { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--sev); border-radius: 8px; padding: 13px; margin-bottom: 8px; }
+    .problem-item:hover { background: color-mix(in srgb, var(--surface2) 80%, white 4%); }
+    .prob-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .sev-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sev); flex-shrink: 0; }
+    .prob-title { font-size: 0.84rem; font-weight: 600; color: var(--text); }
+    .prob-desc { font-size: 0.77rem; color: var(--muted); line-height: 1.55; font-weight: 300; }
+    .sev-badge { margin-left: auto; font-size: 0.61rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; background: color-mix(in srgb, var(--sev) 15%, transparent); color: var(--sev); border: 1px solid color-mix(in srgb, var(--sev) 30%, transparent); flex-shrink: 0; }
 
     /* DISTANCE BOX */
-    .distance-box {
-      background: color-mix(in srgb, #7b9ff5 8%, transparent);
-      border: 1px solid color-mix(in srgb, #7b9ff5 25%, transparent);
-      border-radius: 8px; padding: 16px;
-    }
-    .distance-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #7b9ff5; margin-bottom: 8px; }
-    .distance-value {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.8rem; font-weight: 800; color: #7b9ff5;
-      line-height: 1;
-    }
-    .distance-unit { font-size: 1rem; font-weight: 400; margin-left: 4px; }
-    .distance-to { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; }
+    .dist-box { background: color-mix(in srgb, var(--blue) 8%, transparent); border: 1px solid color-mix(in srgb, var(--blue) 22%, transparent); border-radius: 10px; padding: 16px 18px; }
+    .dist-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); margin-bottom: 8px; }
+    .dist-value { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--blue); line-height: 1; }
+    .dist-unit { font-size: 1rem; font-weight: 400; margin-left: 4px; }
+    .dist-note { font-size: 0.72rem; color: var(--muted); margin-top: 6px; }
+
+    /* AREA BOX */
+    .area-box { background: color-mix(in srgb, var(--green) 8%, transparent); border: 1px solid color-mix(in srgb, var(--green) 22%, transparent); border-radius: 10px; padding: 16px 18px; margin-bottom: 10px; }
+    .area-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); margin-bottom: 8px; }
+    .area-value { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--green); line-height: 1; }
+    .area-unit { font-size: 1rem; font-weight: 400; margin-left: 4px; }
+
+    /* GOOGLE MAPS BUTTON */
+    .maps-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 11px; border-radius: 8px; background: color-mix(in srgb, #4285f4 12%, transparent); border: 1px solid color-mix(in srgb, #4285f4 30%, transparent); color: #7aaaf5; font-size: 0.82rem; font-weight: 600; text-decoration: none; transition: background 0.2s, color 0.2s; margin-top: 4px; }
+    .maps-btn:hover { background: color-mix(in srgb, #4285f4 20%, transparent); color: #fff; }
 
     /* MAP */
-    #map {
-      flex: 1;
-      height: 100%;
-    }
+    #map { flex: 1; height: 100%; }
 
-    /* Leaflet popup override */
-    .leaflet-popup-content-wrapper {
-      background: var(--surface2) !important;
-      border: 1px solid var(--border) !important;
-      border-radius: 8px !important;
-      color: var(--text) !important;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
-    }
+    /* LEGEND */
+    .legend { position: absolute; bottom: 24px; right: 16px; z-index: 999; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; }
+    .leg-item { display: flex; align-items: center; gap: 8px; font-size: 0.74rem; color: var(--muted); margin-bottom: 6px; }
+    .leg-item:last-child { margin-bottom: 0; }
+    .leg-dot { width: 12px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+    /* Leaflet popup */
+    .leaflet-popup-content-wrapper { background: var(--surface2) !important; border: 1px solid var(--border) !important; border-radius: 8px !important; color: var(--text) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important; }
     .leaflet-popup-tip { background: var(--surface2) !important; }
-    .leaflet-popup-content {
-      font-family: 'DM Sans', sans-serif !important;
-      font-size: 0.82rem !important; margin: 12px 14px !important;
-    }
-    .popup-name {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700; font-size: 0.9rem;
-      margin-bottom: 4px; color: var(--text);
-    }
-    .popup-hint { color: var(--text-muted); font-size: 0.75rem; }
-
-    /* Scrollbar */
-    .panel::-webkit-scrollbar { width: 4px; }
-    .panel::-webkit-scrollbar-track { background: transparent; }
-    .panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .leaflet-popup-content { font-family: 'DM Sans', sans-serif !important; font-size: 0.82rem !important; margin: 12px 14px !important; }
+    .pop-tag { display: inline-block; font-size: 0.63rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; margin-bottom: 6px; }
+    .pop-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem; margin-bottom: 3px; }
+    .pop-hint { color: var(--muted); font-size: 0.73rem; }
   </style>
 </head>
 <body>
 
 <header>
   <div class="logo">🗺 Tianguis</div>
-  <div class="subtitle">Reporte de Corredores Comerciales</div>
-  <div class="badge">Querétaro</div>
+  <div class="subtitle">Reporte – Corredor Comercial de Peñaflor</div>
+  <div class="header-badge">Felipe Carrillo Puerto</div>
 </header>
 
 <div class="layout">
   <aside class="sidebar">
     <div class="sidebar-header">
       <h2>Panel de información</h2>
-      <p>Selecciona un corredor en el mapa</p>
+      <p>Selecciona un polígono en el mapa</p>
     </div>
-
-    <!-- Estado por defecto -->
     <div class="default-state" id="defaultState">
       <div class="icon">👆</div>
-      <p>Haz clic sobre cualquier<br>corredor en el mapa para<br>ver su información detallada.</p>
+      <p>
+        Haz clic sobre el <strong style="color:var(--red)">corredor actual</strong> (rojo)<br>
+        o sobre una <strong style="color:var(--green)">propuesta de reubicación</strong> (verde)<br>
+        para ver su información detallada.
+      </p>
     </div>
-
-    <!-- Panel dinámico -->
     <div class="panel" id="infoPanel"></div>
   </aside>
 
-  <div id="map"></div>
+  <div style="position:relative;flex:1;">
+    <div id="map"></div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#e63946"></div>Corredor actual</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#2a9d8f;border:1px dashed #2a9d8f"></div>Propuestas de reubicación (5)</div>
+    </div>
+  </div>
 </div>
 
 <script>
-// ───────────────────────────────────────────────
-// INICIALIZAR MAPA
-// ───────────────────────────────────────────────
+// ── MAPA ─────────────────────────────────────────────
 const map = L.map('map', {
-  center: [20.5900, -100.3920],
-  zoom: 16,
+  center: [20.6420, -100.4870],
+  zoom: 15,
   zoomControl: true
 });
 
@@ -290,173 +185,249 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
   subdomains: 'abcd', maxZoom: 19
 }).addTo(map);
 
-// ───────────────────────────────────────────────
-// CARGAR DATOS Y DIBUJAR
-// ───────────────────────────────────────────────
+// ── HELPERS ──────────────────────────────────────────
+function sevColor(s) {
+  return s === 'alta' ? '#ff4757' : s === 'media' ? '#ffa502' : '#2ed573';
+}
+
+function calcArea(coordenadas) {
+  const poly = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coordenadas.map(c => [c[1], c[0]])] } };
+  const m2 = turf.area(poly);
+  return {
+    display: m2 < 10000 ? `${Math.round(m2).toLocaleString('es-MX')}` : `${(m2/10000).toFixed(2)}`,
+    unit: m2 < 10000 ? 'm²' : 'ha',
+    raw: m2
+  };
+}
+
+function calcDistance(coords1, coords2) {
+  const centroid = arr => {
+    const n = arr.length;
+    const s = arr.reduce((a, b) => [a[0]+b[0], a[1]+b[1]], [0,0]);
+    return turf.point([s[1]/n, s[0]/n]);
+  };
+  const d = turf.distance(centroid(coords1), centroid(coords2), { units: 'meters' });
+  return Math.round(d).toLocaleString('es-MX');
+}
+
+// ── INIT ─────────────────────────────────────────────
 fetch('./data/tianguis.json')
   .then(r => r.json())
-  .then(data => initApp(data))
-  .catch(e => { console.error('Error cargando datos:', e); });
+  .then(initApp);
 
-function initApp(tianguisList) {
-  const layers = {};
+function initApp(data) {
+  const { corredor, prediosReubicacion } = data;
+  const allLayers = [];
 
-  tianguisList.forEach(t => {
-    const poly = L.polygon(t.coordenadas, {
-      color: t.color,
-      fillColor: t.color,
-      fillOpacity: 0.25,
-      weight: 2.5,
-      dashArray: null
+  function resetStyles() {
+    allLayers.forEach(l => l.setStyle({ weight: 2.5, fillOpacity: 0.22 }));
+  }
+
+  // ── CORREDOR PRINCIPAL (rojo)
+  const corridorLayer = L.polygon(corredor.coordenadas, {
+    color: '#e63946', fillColor: '#e63946',
+    fillOpacity: 0.22, weight: 2.5
+  }).addTo(map);
+
+  corridorLayer.bindPopup(`
+    <div class="pop-tag" style="background:color-mix(in srgb,#e63946 15%,transparent);color:#e63946;border:1px solid color-mix(in srgb,#e63946 30%,transparent)">● Corredor actual</div>
+    <div class="pop-name">${corredor.nombre}</div>
+    <div class="pop-hint">Click para ver detalles →</div>
+  `, { closeButton: false });
+
+  corridorLayer.on('mouseover', function() { this.openPopup(); });
+  corridorLayer.on('mouseout',  function() { this.closePopup(); });
+  corridorLayer.on('click', () => {
+    resetStyles();
+    corridorLayer.setStyle({ weight: 4, fillOpacity: 0.38 });
+    showCorredorPanel(corredor, prediosReubicacion);
+    map.flyToBounds(corridorLayer.getBounds(), { padding: [80, 80], duration: 0.7 });
+  });
+  allLayers.push(corridorLayer);
+
+  // ── PREDIOS REUBICACIÓN (verde, bordeados con dash)
+  prediosReubicacion.forEach((predio, i) => {
+    const layer = L.polygon(predio.coordenadas, {
+      color: '#2a9d8f', fillColor: '#2a9d8f',
+      fillOpacity: 0.22, weight: 2.5,
+      dashArray: '7 4'
     }).addTo(map);
 
-    // Popup al hover
-    poly.bindPopup(`
-      <div class="popup-name">${t.nombre}</div>
-      <div class="popup-hint">Click para ver detalles →</div>
+    // Número sobre el polígono
+    const center = layer.getBounds().getCenter();
+    L.marker(center, {
+      icon: L.divIcon({
+        className: '',
+        html: `<div style="
+          font-family:'Syne',sans-serif;font-weight:800;font-size:13px;
+          color:#fff;background:#2a9d8f;border:2px solid #fff;
+          width:26px;height:26px;border-radius:50%;
+          display:flex;align-items:center;justify-content:center;
+          box-shadow:0 2px 8px rgba(0,0,0,0.4);
+          margin-left:-13px;margin-top:-13px;
+        ">${predio.numero}</div>`,
+        iconSize: [26, 26]
+      })
+    }).addTo(map);
+
+    layer.bindPopup(`
+      <div class="pop-tag" style="background:color-mix(in srgb,#2a9d8f 15%,transparent);color:#2a9d8f;border:1px solid color-mix(in srgb,#2a9d8f 30%,transparent)">● Propuesta ${predio.numero}</div>
+      <div class="pop-name">${predio.nombre}</div>
+      <div class="pop-hint">Click para ver detalles →</div>
     `, { closeButton: false });
 
-    poly.on('mouseover', function(e) { this.openPopup(); });
-    poly.on('mouseout',  function(e) { this.closePopup(); });
-
-    poly.on('click', () => {
-      // Resaltar seleccionado
-      Object.values(layers).forEach(l => l.setStyle({ weight: 2.5, fillOpacity: 0.25 }));
-      poly.setStyle({ weight: 4, fillOpacity: 0.4 });
-
-      showPanel(t, tianguisList, poly);
+    layer.on('mouseover', function() { this.openPopup(); });
+    layer.on('mouseout',  function() { this.closePopup(); });
+    layer.on('click', () => {
+      resetStyles();
+      layer.setStyle({ weight: 4, fillOpacity: 0.4 });
+      showPredioPanel(predio, corredor);
+      map.flyToBounds(layer.getBounds(), { padding: [80, 80], duration: 0.7 });
     });
-
-    layers[t.id] = poly;
+    allLayers.push(layer);
   });
-}
 
-// ───────────────────────────────────────────────
-// CALCULAR ÁREA (turf)
-// ───────────────────────────────────────────────
-function calcArea(coordenadas) {
-  const geojson = {
-    type: 'Feature',
-    geometry: {
-      type: 'Polygon',
-      coordinates: [coordenadas.map(c => [c[1], c[0]])] // [lng, lat]
-    }
-  };
-  const area = turf.area(geojson);
-  return area < 10000
-    ? `${area.toFixed(0)} m²`
-    : `${(area / 10000).toFixed(2)} ha`;
-}
+  // Centrar para ver todo
+  const allCoords = [
+    ...corredor.coordenadas,
+    ...prediosReubicacion.flatMap(p => p.coordenadas)
+  ];
+  const allBounds = L.latLngBounds(allCoords);
+  map.fitBounds(allBounds, { padding: [50, 50] });
 
-// ───────────────────────────────────────────────
-// CALCULAR DISTANCIA ENTRE CORREDORES (centroides)
-// ───────────────────────────────────────────────
-function calcDistance(t1, t2) {
-  const c1 = t1.coordenadas.reduce((a, b) => [a[0]+b[0], a[1]+b[1]], [0,0]);
-  const c2 = t2.coordenadas.reduce((a, b) => [a[0]+b[0], a[1]+b[1]], [0,0]);
-  const n = t1.coordenadas.length;
-  const m = t2.coordenadas.length;
-  const lat1 = c1[0]/n, lng1 = c1[1]/n;
-  const lat2 = c2[0]/m, lng2 = c2[1]/m;
+  // ── PANEL CORREDOR
+  function showCorredorPanel(c, predios) {
+    document.getElementById('defaultState').style.display = 'none';
+    const panel = document.getElementById('infoPanel');
+    panel.classList.add('active');
 
-  const pt1 = turf.point([lng1, lat1]);
-  const pt2 = turf.point([lng2, lat2]);
-  const dist = turf.distance(pt1, pt2, { units: 'meters' });
-  return dist.toFixed(0);
-}
-
-// ───────────────────────────────────────────────
-// SEVERIDAD
-// ───────────────────────────────────────────────
-function sevColor(sev) {
-  return sev === 'alta' ? '#ff4757' : sev === 'media' ? '#ffa502' : '#2ed573';
-}
-
-// ───────────────────────────────────────────────
-// MOSTRAR PANEL
-// ───────────────────────────────────────────────
-function showPanel(t, all, poly) {
-  document.getElementById('defaultState').style.display = 'none';
-  const panel = document.getElementById('infoPanel');
-  panel.classList.add('active');
-
-  const area = calcArea(t.coordenadas);
-  const otros = all.filter(x => x.id !== t.id);
-  const distanciaHTML = otros.map(otro => {
-    const dist = calcDistance(t, otro);
-    return `
-      <div class="distance-box" style="margin-bottom:10px">
-        <div class="distance-label">Distancia al ${otro.nombre}</div>
-        <div class="distance-value">${Number(dist).toLocaleString('es-MX')}<span class="distance-unit">m</span></div>
-        <div class="distance-to">medida entre centroides de ambos polígonos</div>
-      </div>`;
-  }).join('');
-
-  const problemasHTML = t.problemas.map(p => `
-    <div class="problem-item" style="--sev-color:${sevColor(p.severidad)}">
-      <div class="problem-header">
-        <div class="sev-dot"></div>
-        <div class="problem-title">${p.titulo}</div>
-        <div class="sev-badge">${p.severidad}</div>
+    const area = calcArea(c.coordenadas);
+    const folios = c.foliosDenuncia.map(f => `<span class="folio-badge">📋 ${f}</span>`).join('');
+    const obsHTML = c.observaciones.map(o => `<div class="obs-item">${o}</div>`).join('');
+    const probHTML = c.problemas.map(p => `
+      <div class="problem-item" style="--sev:${sevColor(p.severidad)}">
+        <div class="prob-header">
+          <div class="sev-dot"></div>
+          <div class="prob-title">${p.titulo}</div>
+          <div class="sev-badge">${p.severidad}</div>
+        </div>
+        <div class="prob-desc">${p.descripcion}</div>
       </div>
-      <div class="problem-desc">${p.descripcion}</div>
-    </div>
-  `).join('');
+    `).join('');
 
-  panel.innerHTML = `
-    <div class="panel-top">
-      <div class="panel-tag" style="--color:${t.color}">${t.colorNombre} – ${t.categoria}</div>
-      <h1>${t.nombre}</h1>
-      <p class="desc">${t.descripcion}</p>
-    </div>
+    panel.innerHTML = `
+      <div class="panel-top">
+        <span class="tag" style="color:#e63946;background:color-mix(in srgb,#e63946 12%,transparent);border:1px solid color-mix(in srgb,#e63946 28%,transparent)">Corredor actual</span>
+        <h1>${c.nombre}</h1>
+        <p class="desc">${c.descripcion}</p>
+        <div class="folio-row">${folios}</div>
+      </div>
 
-    <div class="stats-grid">
-      <div class="stat-cell">
-        <div class="stat-label">Área del corredor</div>
-        <div class="stat-value highlight">${area}</div>
+      <div class="stats-grid">
+        <div class="stat-cell full">
+          <div class="stat-label">Ubicación</div>
+          <div class="stat-value sm">${c.ubicacion}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">Área del corredor</div>
+          <div class="stat-value accent">${area.display} ${area.unit}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">Último seguimiento</div>
+          <div class="stat-value sm">${c.ultimoSeguimiento}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">Delegación</div>
+          <div class="stat-value sm">${c.delegacion}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">Organización</div>
+          <div class="stat-value sm">${c.organizacion}</div>
+        </div>
+        <div class="stat-cell full">
+          <div class="stat-label">Coordinador(a)</div>
+          <div class="stat-value">${c.coordinador}</div>
+        </div>
       </div>
-      <div class="stat-cell">
-        <div class="stat-label">N° de locales</div>
-        <div class="stat-value">${t.numeroLocales}</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-label">Días de operación</div>
-        <div class="stat-value">${t.diasOperacion}</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-label">Horario</div>
-        <div class="stat-value">${t.horario}</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-label">Antigüedad</div>
-        <div class="stat-value">${t.antiguedad}</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-label">Problemas reportados</div>
-        <div class="stat-value">${t.problemas.length}</div>
-      </div>
-    </div>
 
-    <div class="section">
-      <div class="section-title">Contacto</div>
-      <div class="contact-row"><span>🏛</span><span><strong>${t.responsable}</strong></span></div>
-      <div class="contact-row"><span>📞</span><span>${t.telefono}</span></div>
-    </div>
+      <div class="section">
+        <div class="section-title">Observaciones del seguimiento</div>
+        ${obsHTML}
+      </div>
 
-    <div class="section">
-      <div class="section-title">Distancia a otros corredores</div>
-      ${distanciaHTML}
-    </div>
+      <div class="section">
+        <div class="section-title">Problemática (${c.problemas.length} issues)</div>
+        ${probHTML}
+      </div>
 
-    <div class="section">
-      <div class="section-title">Problemas identificados (${t.problemas.length})</div>
-      ${problemasHTML}
-    </div>
-  `;
+      <div class="section">
+        <div class="section-title">Propuestas de reubicación</div>
+        <p style="font-size:0.79rem;color:var(--muted);line-height:1.6">Hay <strong style="color:var(--green)">${predios.length} predios propuestos</strong> marcados en verde en el mapa. Haz clic en cualquiera para ver su ubicación, dimensiones y distancia al corredor actual.</p>
+      </div>
+    `;
+  }
 
-  // Fly al corredor
-  const bounds = L.polygon(t.coordenadas).getBounds();
-  map.flyToBounds(bounds, { padding: [80, 80], duration: 0.8 });
+  // ── PANEL PREDIO
+  function showPredioPanel(predio, corredor) {
+    document.getElementById('defaultState').style.display = 'none';
+    const panel = document.getElementById('infoPanel');
+    panel.classList.add('active');
+
+    const area = calcArea(predio.coordenadas);
+    const dist = calcDistance(predio.coordenadas, corredor.coordenadas);
+
+    const mapsBtn = predio.googleMaps
+      ? `<a class="maps-btn" href="${predio.googleMaps}" target="_blank" rel="noopener">
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+           Ver en Google Maps
+         </a>`
+      : `<p style="font-size:0.75rem;color:var(--muted);text-align:center;padding:8px 0">Sin link de Google Maps disponible</p>`;
+
+    panel.innerHTML = `
+      <div class="panel-top">
+        <span class="tag" style="color:#2a9d8f;background:color-mix(in srgb,#2a9d8f 12%,transparent);border:1px solid color-mix(in srgb,#2a9d8f 28%,transparent)">Propuesta ${predio.numero} de reubicación</span>
+        <h1>${predio.nombre}</h1>
+        <p class="desc">${predio.direccion}</p>
+      </div>
+
+      <div class="section">
+        ${mapsBtn}
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-cell full">
+          <div class="stat-label">Dirección</div>
+          <div class="stat-value sm">${predio.direccion}</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="area-box">
+          <div class="area-label">Dimensiones del predio</div>
+          <div class="area-value">${area.display}<span class="area-unit">${area.unit}</span></div>
+        </div>
+        <div class="dist-box">
+          <div class="dist-label">Distancia al corredor actual</div>
+          <div class="dist-value">${dist}<span class="dist-unit">m</span></div>
+          <div class="dist-note">medida entre centroides de ambos polígonos</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Comparativa con corredor actual</div>
+        <div class="stats-grid" style="border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-top:0">
+          <div class="stat-cell" style="background:color-mix(in srgb,#e63946 8%,var(--surface))">
+            <div class="stat-label" style="color:#e63946">Corredor actual</div>
+            <div class="stat-value sm">${calcArea(corredor.coordenadas).display} ${calcArea(corredor.coordenadas).unit}</div>
+          </div>
+          <div class="stat-cell" style="background:color-mix(in srgb,#2a9d8f 8%,var(--surface))">
+            <div class="stat-label" style="color:#2a9d8f">Este predio</div>
+            <div class="stat-value sm">${area.display} ${area.unit}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
 }
 </script>
 </body>
