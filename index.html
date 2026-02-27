@@ -559,14 +559,8 @@ function initApp(data) {
     allLayers.push(tLayer);
   });
 
-  // Centrar para ver todo
-  const allCoords = [
-    ...corredor.coordenadas,
-    ...prediosReubicacion.flatMap(p => p.coordenadas),
-    ...otrosTianguis.flatMap(t => t.coordenadas)
-  ];
-  const allBounds = L.latLngBounds(allCoords);
-  map.fitBounds(allBounds, { padding: [50, 50] });
+  // Vista inicial: zoom al corredor
+  map.fitBounds(corridorLayer.getBounds(), { padding: [80, 80] });
 
   // ── PANEL CORREDOR
   function showCorredorPanel(c, predios) {
