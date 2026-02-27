@@ -136,6 +136,101 @@
     .pop-tag { display: inline-block; font-size: 0.63rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; margin-bottom: 6px; }
     .pop-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem; margin-bottom: 3px; }
     .pop-hint { color: var(--muted); font-size: 0.73rem; }
+
+    /* DRAWER HANDLE (mobile only, hidden on desktop) */
+    .drawer-handle { display: none; }
+
+    /* ── MOBILE ────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      /* Header: ocultar subtítulo para ganar espacio */
+      .subtitle { display: none; }
+      header { padding: 0 16px; gap: 10px; }
+      .header-badge { font-size: 0.65rem; padding: 3px 8px; }
+
+      /* Layout: columna, el mapa ocupa todo */
+      .layout { flex-direction: row; }
+
+      /* Sidebar → drawer fijo en la parte inferior */
+      .sidebar {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        width: 100% !important;
+        min-width: unset !important;
+        height: 72px;
+        border-right: none;
+        border-top: 1px solid var(--border);
+        border-radius: 16px 16px 0 0;
+        z-index: 500;
+        transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+      }
+      .sidebar.expanded { height: 58vh; }
+
+      /* Handle visible en móvil */
+      .drawer-handle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 36px;
+        cursor: pointer;
+        flex-shrink: 0;
+        touch-action: manipulation;
+      }
+      .drawer-handle::before {
+        content: '';
+        width: 36px; height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        transition: background 0.2s;
+      }
+      .drawer-handle:active::before { background: var(--muted); }
+
+      /* Sidebar header más compacto */
+      .sidebar-header { padding: 4px 16px 10px; }
+      .sidebar-header h2 { font-size: 0.66rem; }
+      .sidebar-header p { font-size: 0.76rem; }
+
+      /* Estado por defecto más compacto */
+      .default-state { padding: 16px 24px; gap: 8px; }
+      .default-state .icon { font-size: 1.8rem; }
+      .default-state p { font-size: 0.82rem; }
+
+      /* Panel scroll con espacio seguro inferior */
+      .panel { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+      /* Panel top más compacto */
+      .panel-top { padding: 14px 16px; }
+      .panel-top h1 { font-size: 1.05rem; }
+      .panel-top .desc { font-size: 0.83rem; }
+
+      /* Secciones */
+      .section { padding: 14px 16px; }
+      .section-title { font-size: 0.67rem; }
+
+      /* Legibilidad */
+      .stat-label { font-size: 0.67rem; }
+      .stat-value { font-size: 1rem; }
+      .stat-value.sm { font-size: 0.85rem; }
+      .obs-item { font-size: 0.83rem; }
+      .prob-title { font-size: 0.88rem; }
+      .prob-desc { font-size: 0.81rem; }
+
+      /* Botón Google Maps: área táctil mínima 44px */
+      .maps-btn { padding: 14px 16px; font-size: 0.9rem; min-height: 44px; border-radius: 10px; }
+
+      /* Leyenda: sobre el drawer colapsado */
+      .legend { bottom: 84px; right: 12px; padding: 10px 12px; }
+      .leg-item { font-size: 0.72rem; }
+
+      /* Controles de zoom de Leaflet: más grandes en touch */
+      .leaflet-control-zoom a { width: 36px !important; height: 36px !important; line-height: 36px !important; font-size: 18px !important; }
+    }
+
+    /* Pantallas muy pequeñas */
+    @media (max-width: 380px) {
+      .logo { font-size: 0.88rem; }
+      .sidebar.expanded { height: 62vh; }
+    }
   </style>
 </head>
 <body>
@@ -147,7 +242,8 @@
 </header>
 
 <div class="layout">
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
+    <div class="drawer-handle" id="drawerHandle" role="button" aria-label="Abrir panel de información"></div>
     <div class="sidebar-header">
       <h2>Panel de información</h2>
       <p>Selecciona un polígono en el mapa</p>
@@ -173,6 +269,30 @@
 </div>
 
 <script>
+// ── MOBILE HELPERS ────────────────────────────────────
+const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+const isMobile = () => window.innerWidth <= 768;
+
+// Drawer toggle
+const sidebar  = document.getElementById('sidebar');
+const drawerHandle = document.getElementById('drawerHandle');
+drawerHandle.addEventListener('click', () => {
+  sidebar.classList.toggle('expanded');
+});
+
+function openDrawer()  { sidebar.classList.add('expanded'); }
+function closeDrawer() { sidebar.classList.remove('expanded'); }
+
+// Instrucción táctil vs ratón
+const defaultState = document.getElementById('defaultState');
+if (isTouch) {
+  defaultState.querySelector('p').innerHTML =
+    'Toca el <strong style="color:var(--red)">corredor actual</strong> (rojo)<br>' +
+    'o una <strong style="color:var(--green)">propuesta de reubicación</strong> (verde)<br>' +
+    'para ver su información detallada.';
+  defaultState.querySelector('.icon').textContent = '👇';
+}
+
 // ── MAPA ─────────────────────────────────────────────
 const map = L.map('map', {
   center: [20.6420, -100.4870],
@@ -235,13 +355,20 @@ function initApp(data) {
     <div class="pop-hint">Click para ver detalles →</div>
   `, { closeButton: false });
 
-  corridorLayer.on('mouseover', function() { this.openPopup(); });
-  corridorLayer.on('mouseout',  function() { this.closePopup(); });
+  if (!isTouch) {
+    corridorLayer.on('mouseover', function() { this.openPopup(); });
+    corridorLayer.on('mouseout',  function() { this.closePopup(); });
+  }
   corridorLayer.on('click', () => {
     resetStyles();
     corridorLayer.setStyle({ weight: 4, fillOpacity: 0.38 });
     showCorredorPanel(corredor, prediosReubicacion);
-    map.flyToBounds(corridorLayer.getBounds(), { padding: [80, 80], duration: 0.7 });
+    if (isMobile()) {
+      openDrawer();
+      map.flyToBounds(corridorLayer.getBounds(), { paddingTopLeft: [20, 20], paddingBottomRight: [20, 160], duration: 0.7 });
+    } else {
+      map.flyToBounds(corridorLayer.getBounds(), { padding: [80, 80], duration: 0.7 });
+    }
   });
   allLayers.push(corridorLayer);
 
@@ -276,13 +403,20 @@ function initApp(data) {
       <div class="pop-hint">Click para ver detalles →</div>
     `, { closeButton: false });
 
-    layer.on('mouseover', function() { this.openPopup(); });
-    layer.on('mouseout',  function() { this.closePopup(); });
+    if (!isTouch) {
+      layer.on('mouseover', function() { this.openPopup(); });
+      layer.on('mouseout',  function() { this.closePopup(); });
+    }
     layer.on('click', () => {
       resetStyles();
       layer.setStyle({ weight: 4, fillOpacity: 0.4 });
       showPredioPanel(predio, corredor);
-      map.flyToBounds(layer.getBounds(), { padding: [80, 80], duration: 0.7 });
+      if (isMobile()) {
+        openDrawer();
+        map.flyToBounds(layer.getBounds(), { paddingTopLeft: [20, 20], paddingBottomRight: [20, 160], duration: 0.7 });
+      } else {
+        map.flyToBounds(layer.getBounds(), { padding: [80, 80], duration: 0.7 });
+      }
     });
     allLayers.push(layer);
   });
@@ -362,7 +496,7 @@ function initApp(data) {
 
       <div class="section">
         <div class="section-title">Propuestas de reubicación</div>
-        <p style="font-size:0.79rem;color:var(--muted);line-height:1.6">Hay <strong style="color:var(--green)">${predios.length} predios propuestos</strong> marcados en verde en el mapa. Haz clic en cualquiera para ver su ubicación, dimensiones y distancia al corredor actual.</p>
+        <p style="font-size:0.79rem;color:var(--muted);line-height:1.6">Hay <strong style="color:var(--green)">${predios.length} predios propuestos</strong> marcados en verde en el mapa. ${isTouch ? 'Toca' : 'Haz clic en'} cualquiera para ver su ubicación, dimensiones y distancia al corredor actual.</p>
       </div>
     `;
   }
