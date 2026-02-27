@@ -36,6 +36,11 @@
         "severidad": "alta"
       }
     ],
+    "fotos": [
+      "data/imagenes/img1.jpeg",
+      "data/imagenes/img2.jpeg",
+      "data/imagenes/img3.jpeg"
+    ],
     "coordenadas": [
       [20.642581835192246, -100.49026574384561],
       [20.642218933372078, -100.49010606193153],
@@ -115,6 +120,44 @@
         [20.643268488895586, -100.48566458647990],
         [20.64362143698409,  -100.48478453501848],
         [20.644431138327406, -100.48509514141674]
+      ]
+    },
+    {
+      "id": "predio-6",
+      "numero": 6,
+      "nombre": "Propuesta 6 – Av. de la Cantera / Valle Central",
+      "direccion": "Av. de la Cantera entre Boulevard Peñaflor y Valle Central",
+      "googleMaps": "https://maps.app.goo.gl/vsrJBtSvXqrGpMoEA",
+      "coordenadas": [
+        [20.641571446818872, -100.49130443135832],
+        [20.641535057580697, -100.49142108823602],
+        [20.640326927314888, -100.4909311295107],
+        [20.64036695580195,  -100.49076780989677],
+        [20.641571446818872, -100.49130443135832]
+      ]
+    }
+  ],
+  "otrosTianguis": [
+    {
+      "id": "tianguis-valle-monpani",
+      "nombre": "Tianguis Valle de Monpani",
+      "color": "#3b7cf5",
+      "ubicacion": "Av. Valle de Monpani entre el Valle del Salitre y Valle de San Pedro Mártir",
+      "colonia": "Valle de Santiago",
+      "delegacion": "Felipe Carrillo Puerto",
+      "organizacion": "FECOPSE",
+      "coordinadores": [
+        { "nombre": "Francisco Javier Alegria Soto" },
+        { "nombre": "Rene Garcia", "telefono": "4421270801" }
+      ],
+      "horario": "Martes y Sábado, 17:00 – 23:00 hrs (nocturno)",
+      "coordenadas": [
+        [20.640970653245816, -100.47802833043347],
+        [20.643328671738786, -100.47905491062075],
+        [20.643306838401855, -100.47916379033728],
+        [20.64098520902816,  -100.47811387878254],
+        [20.640854206941356, -100.47810610166003],
+        [20.640970653245816, -100.47802833043347]
       ]
     }
   ]
