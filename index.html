@@ -329,7 +329,8 @@ if (isTouch) {
 const map = L.map('map', {
   center: [20.6420, -100.4870],
   zoom: 15,
-  zoomControl: true
+  zoomControl: true,
+  renderer: L.svg()
 });
 
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {

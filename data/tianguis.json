@@ -11,7 +11,6 @@
     "foliosDenuncia": ["VP/609/2025"],
     "ultimoSeguimiento": "15 de febrero de 2026",
     "observaciones": [
-      "Se atiende denuncia a las 17:30 hrs.",
       "No hay invasión en banquetas aledañas.",
       "Cada puesto tiene bote de basura.",
       "Hay residuos de basura y escombro juntados para su pronta recolección.",
@@ -65,7 +64,7 @@
       "numero": 2,
       "nombre": "Propuesta 2 – Av. Cantera / Circuito Ciudad del Sol",
       "direccion": "Av. Cantera entre Circuito Ciudad del Sol y Blvd. Peñaflor",
-      "googleMaps": null,
+      "googleMaps": "https://maps.app.goo.gl/WYZLDGRBPhrJEDBAA",
       "coordenadas": [
         [20.639135309799443, -100.490250831072],
         [20.639071533296473, -100.49040227652696],
