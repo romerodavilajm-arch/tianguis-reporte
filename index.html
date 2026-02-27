@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reporte de Tianguis – Querétaro</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Turf.js para cálculo de área y distancia -->
+  <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #181c27;
+      --surface2: #1e2333;
+      --border: #2a2f44;
+      --text: #e8eaf0;
+      --text-muted: #7a82a0;
+      --accent: #f0c040;
+      --red: #e63946;
+      --green: #2a9d8f;
+      --alta: #ff4757;
+      --media: #ffa502;
+      --baja: #2ed573;
+    }
+
+    html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
+
+    /* HEADER */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 16px;
+      padding: 0 24px;
+    }
+    header .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1rem;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    header .subtitle {
+      font-size: 0.78rem; color: var(--text-muted); font-weight: 300;
+      border-left: 1px solid var(--border); padding-left: 16px;
+    }
+    header .badge {
+      margin-left: auto;
+      font-size: 0.7rem; font-weight: 600;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 4px 10px; border-radius: 20px;
+      letter-spacing: 0.05em; text-transform: uppercase;
+    }
+
+    /* LAYOUT */
+    .layout {
+      display: flex;
+      height: 100vh;
+      padding-top: 56px;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 380px;
+      min-width: 380px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+      z-index: 10;
+    }
+
+    .sidebar-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 4px;
+    }
+    .sidebar-header p {
+      font-size: 0.82rem; color: var(--text-muted); font-weight: 300;
+    }
+
+    /* DEFAULT STATE */
+    .default-state {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 32px; gap: 12px; text-align: center;
+    }
+    .default-state .icon { font-size: 2.5rem; opacity: 0.3; }
+    .default-state p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+
+    /* PANEL */
+    .panel { flex: 1; overflow-y: auto; display: none; }
+    .panel.active { display: block; }
+
+    .panel-top {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 20px; margin-bottom: 10px;
+      background: color-mix(in srgb, var(--color) 15%, transparent);
+      color: var(--color);
+      border: 1px solid color-mix(in srgb, var(--color) 30%, transparent);
+    }
+    .panel-tag::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--color); }
+
+    .panel-top h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem; font-weight: 800;
+      color: var(--text); margin-bottom: 8px;
+    }
+    .panel-top .desc {
+      font-size: 0.83rem; color: var(--text-muted); line-height: 1.6; font-weight: 300;
+    }
+
+    /* STATS GRID */
+    .stats-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px; background: var(--border);
+      margin: 0; border-top: 1px solid var(--border);
+    }
+    .stat-cell {
+      background: var(--surface);
+      padding: 14px 18px;
+    }
+    .stat-cell:hover { background: var(--surface2); }
+    .stat-label {
+      font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;
+    }
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700; color: var(--text);
+    }
+    .stat-value.highlight { color: var(--accent); }
+    .stat-value.distance { color: #7b9ff5; }
+
+    /* SECTION */
+    .section { padding: 20px 24px; border-bottom: 1px solid var(--border); }
+    .section-title {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px;
+    }
+
+    /* CONTACT */
+    .contact-row {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.83rem; color: var(--text-muted); margin-bottom: 8px;
+    }
+    .contact-row span:first-child { font-size: 1rem; }
+    .contact-row strong { color: var(--text); font-weight: 500; }
+
+    /* PROBLEMS */
+    .problem-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 10px;
+      border-left: 3px solid var(--sev-color);
+      transition: background 0.2s;
+    }
+    .problem-item:hover { background: color-mix(in srgb, var(--surface2) 80%, white 3%); }
+    .problem-header {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+    }
+    .sev-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--sev-color); flex-shrink: 0;
+    }
+    .problem-title { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+    .problem-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.55; font-weight: 300; }
+    .sev-badge {
+      margin-left: auto; font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 20px;
+      background: color-mix(in srgb, var(--sev-color) 15%, transparent);
+      color: var(--sev-color);
+      border: 1px solid color-mix(in srgb, var(--sev-color) 30%, transparent);
+    }
+
+    /* DISTANCE BOX */
+    .distance-box {
+      background: color-mix(in srgb, #7b9ff5 8%, transparent);
+      border: 1px solid color-mix(in srgb, #7b9ff5 25%, transparent);
+      border-radius: 8px; padding: 16px;
+    }
+    .distance-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #7b9ff5; margin-bottom: 8px; }
+    .distance-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem; font-weight: 800; color: #7b9ff5;
+      line-height: 1;
+    }
+    .distance-unit { font-size: 1rem; font-weight: 400; margin-left: 4px; }
+    .distance-to { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; }
+
+    /* MAP */
+    #map {
+      flex: 1;
+      height: 100%;
+    }
+
+    /* Leaflet popup override */
+    .leaflet-popup-content-wrapper {
+      background: var(--surface2) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 8px !important;
+      color: var(--text) !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+    }
+    .leaflet-popup-tip { background: var(--surface2) !important; }
+    .leaflet-popup-content {
+      font-family: 'DM Sans', sans-serif !important;
+      font-size: 0.82rem !important; margin: 12px 14px !important;
+    }
+    .popup-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700; font-size: 0.9rem;
+      margin-bottom: 4px; color: var(--text);
+    }
+    .popup-hint { color: var(--text-muted); font-size: 0.75rem; }
+
+    /* Scrollbar */
+    .panel::-webkit-scrollbar { width: 4px; }
+    .panel::-webkit-scrollbar-track { background: transparent; }
+    .panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🗺 Tianguis</div>
+  <div class="subtitle">Reporte de Corredores Comerciales</div>
+  <div class="badge">Querétaro</div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>Panel de información</h2>
+      <p>Selecciona un corredor en el mapa</p>
+    </div>
+
+    <!-- Estado por defecto -->
+    <div class="default-state" id="defaultState">
+      <div class="icon">👆</div>
+      <p>Haz clic sobre cualquier<br>corredor en el mapa para<br>ver su información detallada.</p>
+    </div>
+
+    <!-- Panel dinámico -->
+    <div class="panel" id="infoPanel"></div>
+  </aside>
+
+  <div id="map"></div>
+</div>
+
+<script>
+// ───────────────────────────────────────────────
+// INICIALIZAR MAPA
+// ───────────────────────────────────────────────
+const map = L.map('map', {
+  center: [20.5900, -100.3920],
+  zoom: 16,
+  zoomControl: true
+});
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© OpenStreetMap contributors, © CARTO',
+  subdomains: 'abcd', maxZoom: 19
+}).addTo(map);
+
+// ───────────────────────────────────────────────
+// CARGAR DATOS Y DIBUJAR
+// ───────────────────────────────────────────────
+fetch('./data/tianguis.json')
+  .then(r => r.json())
+  .then(data => initApp(data))
+  .catch(e => { console.error('Error cargando datos:', e); });
+
+function initApp(tianguisList) {
+  const layers = {};
+
+  tianguisList.forEach(t => {
+    const poly = L.polygon(t.coordenadas, {
+      color: t.color,
+      fillColor: t.color,
+      fillOpacity: 0.25,
+      weight: 2.5,
+      dashArray: null
+    }).addTo(map);
+
+    // Popup al hover
+    poly.bindPopup(`
+      <div class="popup-name">${t.nombre}</div>
+      <div class="popup-hint">Click para ver detalles →</div>
+    `, { closeButton: false });
+
+    poly.on('mouseover', function(e) { this.openPopup(); });
+    poly.on('mouseout',  function(e) { this.closePopup(); });
+
+    poly.on('click', () => {
+      // Resaltar seleccionado
+      Object.values(layers).forEach(l => l.setStyle({ weight: 2.5, fillOpacity: 0.25 }));
+      poly.setStyle({ weight: 4, fillOpacity: 0.4 });
+
+      showPanel(t, tianguisList, poly);
+    });
+
+    layers[t.id] = poly;
+  });
+}
+
+// ───────────────────────────────────────────────
+// CALCULAR ÁREA (turf)
+// ───────────────────────────────────────────────
+function calcArea(coordenadas) {
+  const geojson = {
+    type: 'Feature',
+    geometry: {
+      type: 'Polygon',
+      coordinates: [coordenadas.map(c => [c[1], c[0]])] // [lng, lat]
+    }
+  };
+  const area = turf.area(geojson);
+  return area < 10000
+    ? `${area.toFixed(0)} m²`
+    : `${(area / 10000).toFixed(2)} ha`;
+}
+
+// ───────────────────────────────────────────────
+// CALCULAR DISTANCIA ENTRE CORREDORES (centroides)
+// ───────────────────────────────────────────────
+function calcDistance(t1, t2) {
+  const c1 = t1.coordenadas.reduce((a, b) => [a[0]+b[0], a[1]+b[1]], [0,0]);
+  const c2 = t2.coordenadas.reduce((a, b) => [a[0]+b[0], a[1]+b[1]], [0,0]);
+  const n = t1.coordenadas.length;
+  const m = t2.coordenadas.length;
+  const lat1 = c1[0]/n, lng1 = c1[1]/n;
+  const lat2 = c2[0]/m, lng2 = c2[1]/m;
+
+  const pt1 = turf.point([lng1, lat1]);
+  const pt2 = turf.point([lng2, lat2]);
+  const dist = turf.distance(pt1, pt2, { units: 'meters' });
+  return dist.toFixed(0);
+}
+
+// ───────────────────────────────────────────────
+// SEVERIDAD
+// ───────────────────────────────────────────────
+function sevColor(sev) {
+  return sev === 'alta' ? '#ff4757' : sev === 'media' ? '#ffa502' : '#2ed573';
+}
+
+// ───────────────────────────────────────────────
+// MOSTRAR PANEL
+// ───────────────────────────────────────────────
+function showPanel(t, all, poly) {
+  document.getElementById('defaultState').style.display = 'none';
+  const panel = document.getElementById('infoPanel');
+  panel.classList.add('active');
+
+  const area = calcArea(t.coordenadas);
+  const otros = all.filter(x => x.id !== t.id);
+  const distanciaHTML = otros.map(otro => {
+    const dist = calcDistance(t, otro);
+    return `
+      <div class="distance-box" style="margin-bottom:10px">
+        <div class="distance-label">Distancia al ${otro.nombre}</div>
+        <div class="distance-value">${Number(dist).toLocaleString('es-MX')}<span class="distance-unit">m</span></div>
+        <div class="distance-to">medida entre centroides de ambos polígonos</div>
+      </div>`;
+  }).join('');
+
+  const problemasHTML = t.problemas.map(p => `
+    <div class="problem-item" style="--sev-color:${sevColor(p.severidad)}">
+      <div class="problem-header">
+        <div class="sev-dot"></div>
+        <div class="problem-title">${p.titulo}</div>
+        <div class="sev-badge">${p.severidad}</div>
+      </div>
+      <div class="problem-desc">${p.descripcion}</div>
+    </div>
+  `).join('');
+
+  panel.innerHTML = `
+    <div class="panel-top">
+      <div class="panel-tag" style="--color:${t.color}">${t.colorNombre} – ${t.categoria}</div>
+      <h1>${t.nombre}</h1>
+      <p class="desc">${t.descripcion}</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-cell">
+        <div class="stat-label">Área del corredor</div>
+        <div class="stat-value highlight">${area}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">N° de locales</div>
+        <div class="stat-value">${t.numeroLocales}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Días de operación</div>
+        <div class="stat-value">${t.diasOperacion}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Horario</div>
+        <div class="stat-value">${t.horario}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Antigüedad</div>
+        <div class="stat-value">${t.antiguedad}</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Problemas reportados</div>
+        <div class="stat-value">${t.problemas.length}</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Contacto</div>
+      <div class="contact-row"><span>🏛</span><span><strong>${t.responsable}</strong></span></div>
+      <div class="contact-row"><span>📞</span><span>${t.telefono}</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Distancia a otros corredores</div>
+      ${distanciaHTML}
+    </div>
+
+    <div class="section">
+      <div class="section-title">Problemas identificados (${t.problemas.length})</div>
+      ${problemasHTML}
+    </div>
+  `;
+
+  // Fly al corredor
+  const bounds = L.polygon(t.coordenadas).getBounds();
+  map.flyToBounds(bounds, { padding: [80, 80], duration: 0.8 });
+}
+</script>
+</body>
+</html>
