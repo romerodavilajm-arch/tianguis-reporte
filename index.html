@@ -544,8 +544,6 @@ function initApp(data) {
   otrosTianguis.forEach(function(tianguis) {
     var tColor = tianguis.color || '#3b7cf5';
     var isInactive = tianguis.activo === false;
-    var isMulti = !!tianguis.multiCoordenadas;
-    var layerCoords = tianguis.multiCoordenadas || tianguis.coordenadas;
 
     var styleOpts = {
       color: tColor, fillColor: tColor,
@@ -554,23 +552,13 @@ function initApp(data) {
       dashArray: isInactive ? '6 5' : null
     };
 
-    var tLayer = isMulti
-      ? L.multiPolygon(layerCoords, styleOpts).addTo(map)
-      : L.polygon(layerCoords, styleOpts).addTo(map);
-
     var popupLabel = isInactive ? 'Tianguis inactivo' : 'Tianguis registrado';
-    tLayer.bindPopup(
+    var popupContent =
       '<div class="pop-tag" style="background:color-mix(in srgb,' + tColor + ' 15%,transparent);color:' + tColor + ';border:1px solid color-mix(in srgb,' + tColor + ' 30%,transparent)">● ' + popupLabel + '</div>' +
       '<div class="pop-name">' + tianguis.nombre + '</div>' +
-      '<div class="pop-hint">' + (isTouch ? 'Toca' : 'Click') + ' para ver detalles →</div>',
-      { closeButton: false }
-    );
+      '<div class="pop-hint">' + (isTouch ? 'Toca' : 'Click') + ' para ver detalles →</div>';
 
-    if (!isTouch) {
-      tLayer.on('mouseover', function() { this.openPopup(); });
-      tLayer.on('mouseout',  function() { this.closePopup(); });
-    }
-    tLayer.on('click', function() {
+    function onTianguisClick() {
       resetStyles();
       tLayer.setStyle({ weight: isInactive ? 2.5 : 4, fillOpacity: isInactive ? 0.14 : 0.38 });
       showTianguisPanel(tianguis, corredor);
@@ -580,7 +568,32 @@ function initApp(data) {
       } else {
         map.flyToBounds(tLayer.getBounds(), { padding: [80, 80], duration: 0.7 });
       }
-    });
+    }
+
+    var tLayer;
+    if (tianguis.multiCoordenadas) {
+      // L.multiPolygon no existe en Leaflet 1.x — usar featureGroup de polígonos individuales
+      var childPolygons = tianguis.multiCoordenadas.map(function(coords) {
+        var p = L.polygon(coords, styleOpts);
+        p.bindPopup(popupContent, { closeButton: false });
+        if (!isTouch) {
+          p.on('mouseover', function() { this.openPopup(); });
+          p.on('mouseout',  function() { this.closePopup(); });
+        }
+        p.on('click', onTianguisClick);
+        return p;
+      });
+      tLayer = L.featureGroup(childPolygons).addTo(map);
+    } else {
+      tLayer = L.polygon(tianguis.coordenadas, styleOpts).addTo(map);
+      tLayer.bindPopup(popupContent, { closeButton: false });
+      if (!isTouch) {
+        tLayer.on('mouseover', function() { this.openPopup(); });
+        tLayer.on('mouseout',  function() { this.closePopup(); });
+      }
+      tLayer.on('click', onTianguisClick);
+    }
+
     allLayers.push(tLayer);
   });
 
