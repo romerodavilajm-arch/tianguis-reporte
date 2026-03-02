@@ -366,8 +366,18 @@ function sevColor(s) {
 }
 
 function calcArea(coordenadas) {
-  const poly = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coordenadas.map(c => [c[1], c[0]])] } };
-  const m2 = turf.area(poly);
+  // Supports single polygon [[lat,lng],...] or multi-polygon [[[lat,lng],...],[...]]
+  var isMulti = Array.isArray(coordenadas[0][0]);
+  var m2 = 0;
+  if (isMulti) {
+    coordenadas.forEach(function(ring) {
+      var poly = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [ring.map(function(c) { return [c[1], c[0]]; })] } };
+      m2 += turf.area(poly);
+    });
+  } else {
+    var poly = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coordenadas.map(function(c) { return [c[1], c[0]]; })] } };
+    m2 = turf.area(poly);
+  }
   return {
     display: m2 < 10000 ? `${Math.round(m2).toLocaleString('es-MX')}` : `${(m2/10000).toFixed(2)}`,
     unit: m2 < 10000 ? 'm²' : 'ha',
@@ -377,8 +387,10 @@ function calcArea(coordenadas) {
 
 function calcDistance(coords1, coords2) {
   const centroid = arr => {
-    const n = arr.length;
-    const s = arr.reduce((a, b) => [a[0]+b[0], a[1]+b[1]], [0,0]);
+    // Use first polygon ring if multi-polygon
+    var pts = Array.isArray(arr[0][0]) ? arr[0] : arr;
+    const n = pts.length;
+    const s = pts.reduce((a, b) => [a[0]+b[0], a[1]+b[1]], [0,0]);
     return turf.point([s[1]/n, s[0]/n]);
   };
   const d = turf.distance(centroid(coords1), centroid(coords2), { units: 'meters' });
@@ -528,16 +540,27 @@ function initApp(data) {
     allLayers.push(layer);
   });
 
-  // ── OTROS TIANGUIS (azul)
+  // ── OTROS TIANGUIS
   otrosTianguis.forEach(function(tianguis) {
     var tColor = tianguis.color || '#3b7cf5';
-    var tLayer = L.polygon(tianguis.coordenadas, {
-      color: tColor, fillColor: tColor,
-      fillOpacity: 0.22, weight: 2.5
-    }).addTo(map);
+    var isInactive = tianguis.activo === false;
+    var isMulti = !!tianguis.multiCoordenadas;
+    var layerCoords = tianguis.multiCoordenadas || tianguis.coordenadas;
 
+    var styleOpts = {
+      color: tColor, fillColor: tColor,
+      fillOpacity: isInactive ? 0.07 : 0.22,
+      weight: isInactive ? 1.8 : 2.5,
+      dashArray: isInactive ? '6 5' : null
+    };
+
+    var tLayer = isMulti
+      ? L.multiPolygon(layerCoords, styleOpts).addTo(map)
+      : L.polygon(layerCoords, styleOpts).addTo(map);
+
+    var popupLabel = isInactive ? 'Tianguis inactivo' : 'Tianguis registrado';
     tLayer.bindPopup(
-      '<div class="pop-tag" style="background:color-mix(in srgb,' + tColor + ' 15%,transparent);color:' + tColor + ';border:1px solid color-mix(in srgb,' + tColor + ' 30%,transparent)">● Tianguis registrado</div>' +
+      '<div class="pop-tag" style="background:color-mix(in srgb,' + tColor + ' 15%,transparent);color:' + tColor + ';border:1px solid color-mix(in srgb,' + tColor + ' 30%,transparent)">● ' + popupLabel + '</div>' +
       '<div class="pop-name">' + tianguis.nombre + '</div>' +
       '<div class="pop-hint">' + (isTouch ? 'Toca' : 'Click') + ' para ver detalles →</div>',
       { closeButton: false }
@@ -549,7 +572,7 @@ function initApp(data) {
     }
     tLayer.on('click', function() {
       resetStyles();
-      tLayer.setStyle({ weight: 4, fillOpacity: 0.38 });
+      tLayer.setStyle({ weight: isInactive ? 2.5 : 4, fillOpacity: isInactive ? 0.14 : 0.38 });
       showTianguisPanel(tianguis, corredor);
       if (isMobile()) {
         openDrawer();
@@ -599,7 +622,15 @@ function initApp(data) {
     html += '<div class="leg-section">Capas</div>';
     html += '<div class="leg-item"><div class="leg-dot" style="background:#e63946"></div>Corredor actual</div>';
     html += '<div class="leg-item"><div class="leg-dot" style="background:#2a9d8f;border:1px dashed #2a9d8f"></div>Propuestas de reubicación (' + data.prediosReubicacion.length + ')</div>';
-    html += '<div class="leg-item"><div class="leg-dot" style="background:#3b7cf5"></div>Otros tianguis</div>';
+    data.otrosTianguis.forEach(function(t) {
+      var tColor = t.color || '#3b7cf5';
+      var inactive = t.activo === false;
+      var dotStyle = inactive
+        ? 'background:' + tColor + ';opacity:0.45;border:1px dashed ' + tColor + ';box-shadow:none'
+        : 'background:' + tColor;
+      var label = t.nombre + (inactive ? ' <em style="opacity:0.6;font-style:normal">(inactivo)</em>' : '');
+      html += '<div class="leg-item"><div class="leg-dot" style="' + dotStyle + '"></div>' + label + '</div>';
+    });
 
     if (data.puestosViaPublica && data.puestosViaPublica.length > 0 && data.organizaciones) {
       html += '<div class="leg-divider"></div>';
@@ -763,40 +794,35 @@ function initApp(data) {
     const panel = document.getElementById('infoPanel');
     panel.classList.add('active');
 
-    const area = calcArea(t.coordenadas);
-    const dist = calcDistance(t.coordenadas, corredorData.coordenadas);
+    const coordsForCalc = t.multiCoordenadas || t.coordenadas;
+    const area = calcArea(coordsForCalc);
+    const dist = calcDistance(coordsForCalc, corredorData.coordenadas);
     const color = t.color || '#3b7cf5';
+    const isInactive = t.activo === false;
 
     const coordsHTML = (t.coordinadores || []).map(function(c) {
       const tel = c.telefono ? ' <span style="color:var(--muted);font-weight:300">· ' + c.telefono + '</span>' : '';
       return '<div style="font-size:0.8rem;color:var(--text);font-weight:500;margin-bottom:3px">' + c.nombre + tel + '</div>';
     }).join('');
 
+    const tagLabel = isInactive ? 'Tianguis inactivo' : 'Tianguis registrado';
+    const ubicDesc = [t.ubicacion, t.colonia ? 'Col. ' + t.colonia : ''].filter(Boolean).join(', ');
+    const statsRows = [
+      t.organizacion ? `<div class="stat-cell"><div class="stat-label">Organización</div><div class="stat-value sm">${t.organizacion}</div></div>` : '',
+      t.delegacion   ? `<div class="stat-cell"><div class="stat-label">Delegación</div><div class="stat-value sm">${t.delegacion}</div></div>` : '',
+      t.horario      ? `<div class="stat-cell full"><div class="stat-label">Horario</div><div class="stat-value sm">${t.horario}</div></div>` : '',
+      coordsHTML     ? `<div class="stat-cell full"><div class="stat-label">Coordinadores</div><div style="padding-top:3px">${coordsHTML}</div></div>` : '',
+    ].filter(Boolean).join('');
+
     panel.innerHTML = `
       <div class="panel-top">
-        <span class="tag" style="color:${color};background:color-mix(in srgb,${color} 12%,transparent);border:1px solid color-mix(in srgb,${color} 28%,transparent)">Tianguis registrado</span>
+        <span class="tag" style="color:${color};background:color-mix(in srgb,${color} 12%,transparent);border:1px solid color-mix(in srgb,${color} 28%,transparent)">${tagLabel}</span>
         <h1>${t.nombre}</h1>
-        <p class="desc">${t.ubicacion}, Col. ${t.colonia}</p>
+        ${ubicDesc ? `<p class="desc">${ubicDesc}</p>` : ''}
+        ${isInactive ? '<div class="folio-row"><span class="folio-badge" style="background:color-mix(in srgb,#94a3b8 10%,transparent);border-color:color-mix(in srgb,#94a3b8 30%,transparent);color:#64748b">Sin operación activa</span></div>' : ''}
       </div>
 
-      <div class="stats-grid">
-        <div class="stat-cell">
-          <div class="stat-label">Organización</div>
-          <div class="stat-value sm">${t.organizacion}</div>
-        </div>
-        <div class="stat-cell">
-          <div class="stat-label">Delegación</div>
-          <div class="stat-value sm">${t.delegacion}</div>
-        </div>
-        <div class="stat-cell full">
-          <div class="stat-label">Horario</div>
-          <div class="stat-value sm">${t.horario}</div>
-        </div>
-        <div class="stat-cell full">
-          <div class="stat-label">Coordinadores</div>
-          <div style="padding-top:3px">${coordsHTML}</div>
-        </div>
-      </div>
+      ${statsRows ? `<div class="stats-grid">${statsRows}</div>` : ''}
 
       <div class="section">
         <div class="dist-box" style="background:color-mix(in srgb,${color} 8%,transparent);border:1px solid color-mix(in srgb,${color} 22%,transparent)">
